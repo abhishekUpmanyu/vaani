@@ -25,7 +25,7 @@
 	int getSymbolIdx(char token);
     float symbolVal(char symbol);
     void updateSymbolVal(char symbol, float val);
-    float addToTable(char operand, char operator1, char operator2);
+    float addToTable(char operand, char operator1, char operator2); //save this?no
     void generateCode();
 %}
 
