@@ -39,3 +39,17 @@ git commit -m "<Some Commit message>"
 git push origin branchName
 ```
 4. Go to github and open a PR for your branch
+
+## Syncing the code with GitHub remote
+ 
+In case there have been changes on the Github repo that you need to import in your program as well.
+
+It is better to do this only after you've pushed your code and it has been merged with master.
+In case you've made local changes after your code is pushed, you will need to stash your changes, pull the code and apply the stash to reiterate changes on the code. (WARNING, Create a backup of any uncommitted changes to a new folder incase anything goes wrong) 
+
+```
+git stash
+git fetch
+git pull origin master
+git stash apply
+```
