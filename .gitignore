@@ -1,0 +1,6 @@
+lex.yy.c
+vaani.tab.c
+vaani.tab.h
+y.tab.c
+y.tab.h
+out

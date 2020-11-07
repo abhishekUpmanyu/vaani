@@ -1,12 +1,12 @@
 %{
-    void yyerror(char *s)
-
+    void yyerror(char *s);
+	int yylex();
     #include <stdio.h>
     #include <stdlib.h>
     #include <string.h>
-    #include "writefile.h"
+	#include <ctype.h>
 
-    int symbols[100];
+    float symbols[52];
     char temp[10];
     char lineW[100];
     int idx = 0;
@@ -17,15 +17,15 @@
         char operator[5];
         char operand_1[20];
         char operand_2[20];
-    }
+    };
 
-    struct threeADD quadraple[20];
+    // struct threeADD quadraple[20];
 
     void yyerror (char *s);
-
-    int symbolVal(char symbol);
-    void updateSymbolVal(char symbol, int val);
-    int addToTable(char operand, char operator1, char operator2);
+	int getSymbolIdx(char token);
+    float symbolVal(char symbol);
+    void updateSymbolVal(char symbol, float val);
+    float addToTable(char operand, char operator1, char operator2);
     void generateCode();
 %}
 
@@ -33,39 +33,71 @@
 	struct incod
 	{
 		char codeVariable[10];
-		int val;
+		float val;
 	};
 }
 
-%union {int num; char id; int cond; struct incod code;}         /* Yacc definitions */
+%union {float num; char id; int cond; struct incod code;}         /* Yacc definitions */
 %start line
 
 %token print
+%token exit_statement
 %token <num> num
 %token <id> id
 %token <num> true_
 %token <num> false_
 
-%token less
-%token greater
-%token equal
-%token lessequal
-%token greaterequal
+%token less greater equal
+%token lessequal greaterequal
 %token notequal
 %token if_
 %token else_
 %token while_
 
 %type <num> line 
-%type <code> exp term ending_term condition
+%type <num> expression
 %type <id> assignment
 
 %left '+' '-'
 %left '*' '/' '%'
 
 %%
-    /* Add Code Here */
+
+    line		: assignment ';'			{;}
+				| exit_statement ';'		{
+												printf("Exiting program. Goodbye\n");
+												exit(0);
+											}
+				| print expression ';'		{ printf("Printing %f\n", $2); }
+				| line assignment ';'		{;}
+				| line exit_statement ';'	{
+												printf("Exiting program. Goodbye\n");	
+												exit(0);
+											}
+				| line print expression ';'	{ printf("Printing %f\n", $3); }
+				;
+	
+	assignment	: id '=' expression			{ printf("[log] Assignment - %c=%f\n", $1, $3); updateSymbolVal($1, $3);}
+				;
+	expression	: num						{ printf("[log] ValueNum - %f=%f\n", $$, $1); $$ = $1; }
+				| id 						{ printf("[log] ValueId - %c\n", $1); $$ = symbolVal($1);}
+				| expression '+' expression { printf("[log] Addition - %f+%f\n", $1, $3); $$ = $1+$3;}
+				| expression '-' expression { printf("[log] Subtraction -  %f-%f\n", $1, $3); $$ = $1-$3;}
+				| expression '*' expression { printf("[log] Multiplication - %f*%f\n", $1, $3); $$ = $1*$3;}
+				| expression '/' expression { printf("[log] Division - %f/%f\n", $1, $3); $$ = $1/$3;}
+				| '(' expression ')' 		{ printf("[log] Paranthesis\n"); $$ = $2;}
+				;
+			
 %%
+
+/* returns the value of a given symbol */
+
+float symbolVal(char symbol)
+{
+	int bucket = getSymbolIdx(symbol);
+	return symbols[bucket];
+}
+
 
 int getSymbolIdx(char token)
 {
@@ -78,46 +110,38 @@ int getSymbolIdx(char token)
 	return idx;
 }
 
-/* returns the value of a given symbol */
-
-int symbolVal(char symbol)
-{
-	int bucket = getSymbolIdx(symbol);
-	return symbols[bucket];
-}
-
 /* updates the value of a given symbol */
-void updateSymbolVal(char symbol, int val)
+void updateSymbolVal(char symbol, float val)
 {
 	int bucket = getSymbolIdx(symbol);
 	symbols[bucket] = val;
 }
 void generateCode()
 {
-	int count = 0;
-	char buffer[50];
+	// int count = 0;
+	// char buffer[50];
 
-	while(count < ind)
-	{
+	// while(count < ind)
+	// {
 		
-		if (strcmp(quadraple[count].result, "")==0)
-		{
-			sprintf(buffer, "%s %s", quadraple[count].operator, quadraple[count].operand_1);
-			writeLine(buffer);
-			count++;
-			continue;
-		}
-		sprintf(buffer, "%s := %s %s %s", quadraple[count].result, quadraple[count].operand_1,
-			quadraple[count].operator, quadraple[count].operand_2);
-		writeLine(buffer);
-		count++;
-	}
+	// 	if (strcmp(quadraple[count].result, "")==0)
+	// 	{
+	// 		sprintf(buffer, "%s %s", quadraple[count].operator, quadraple[count].operand_1);
+	// 		writeLine(buffer);
+	// 		count++;
+	// 		continue;
+	// 	}
+	// 	sprintf(buffer, "%s := %s %s %s", quadraple[count].result, quadraple[count].operand_1,
+	// 		quadraple[count].operator, quadraple[count].operand_2);
+	// 	writeLine(buffer);
+	// 	count++;
+	// }
 }
 
 int main (void)
 {
 	yyparse();
-	generateCode();
+	// generateCode();
 }
 
 void yyerror (char *s) {fprintf (stderr, "%s at line %d\n", s, line);}
