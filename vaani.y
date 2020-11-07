@@ -25,7 +25,7 @@
 	int getSymbolIdx(char token);
     float symbolVal(char symbol);
     void updateSymbolVal(char symbol, float val);
-    float addToTable(char operand, char operator1, char operator2); //save this?no
+    float addToTable(char operand, char operator1, char operator2);
     void generateCode();
 %}
 
@@ -55,8 +55,8 @@
 %token while_
 
 %type <num> line 
-%type <num> expression
-%type <id> assignment
+%type <num> expression condition
+%type <id> assignment 
 
 %left '+' '-'
 %left '*' '/' '%'
@@ -87,7 +87,33 @@
 				| expression '/' expression { printf("[log] Division - %f/%f\n", $1, $3); $$ = $1/$3;}
 				| '(' expression ')' 		{ printf("[log] Paranthesis\n"); $$ = $2;}
 				;
-			
+	condition   : expression less expression      { $$.val = ($1.val<$3.val);
+											       printf("[log] %f<%f\n", $1,$3); 
+											      }
+				| expression greater expression   { $$.val = ($1.val>$3.val);
+												    printf("[log] %f>%f\n", $1,$3); 
+												  }
+				| expression equal expression     { $$.val = ($1.val==$3.val);
+				                                    printf("[log] %f==%f\n", $1,$3); 
+				                                  }
+				| expression lessequal expression { $$.val = ($1.val<=$3.val);
+				                                    printf("[log] %f<=%f\n", $1,$3); 
+				                                  }
+				| expression greaterequal expression {  $$.val = ($1.val>=$3.val);
+				                                       printf("[log] %f>=%f\n", $1,$3); 
+				                                     } 
+				| expression notequal expression {$$.val = ($1.val!=$3.val);
+				                                    printf("[log] %f!=%f\n", $1,$3); 
+				                                }
+				| true_ {$$.val = 1;
+						printf("[log] %f=1", $$); 
+
+				        }
+				| false_ {$$.val  = 0;
+						printf("[log] %f=0", $$);
+				         }
+				;
+
 %%
 
 /* returns the value of a given symbol */
