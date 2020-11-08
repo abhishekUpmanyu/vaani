@@ -77,6 +77,7 @@
 				;
 	
 	assignment	: id '=' expression			{ printf("[log] Assignment - %c=%f\n", $1, $3); updateSymbolVal($1, $3);}
+				| id '=' relation			{ printf("[log] Assignment - %c=%f\n", $1, $3); updateSymbolVal($1, $3);}
 				;
 	expression	: num						{ printf("[log] ValueNum - %f=%f\n", $$, $1); $$ = $1; }
 				| id 						{ printf("[log] ValueId - %c\n", $1); $$ = symbolVal($1);}
@@ -141,6 +142,7 @@ void updateSymbolVal(char symbol, float val)
 	int bucket = getSymbolIdx(symbol);
 	symbols[bucket] = val;
 }
+
 void generateCode()
 {
 	// int count = 0;
