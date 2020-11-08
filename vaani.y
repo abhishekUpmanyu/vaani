@@ -29,13 +29,7 @@
     void generateCode();
 %}
 
-%code requires {
-	struct incod
-	{
-		char codeVariable[10];
-		float val;
-	};
-}
+
 
 %union {float num; char id; int cond; struct incod code;}         /* Yacc definitions */
 %start line
@@ -55,8 +49,10 @@
 %token while_
 
 %type <num> line 
-%type <num> expression
-%type <id> assignment
+%type <num> expression 
+%type <id> assignment 
+%type <num> relation
+
 
 %left '+' '-'
 %left '*' '/' '%'
@@ -74,7 +70,10 @@
 												printf("Exiting program. Goodbye\n");	
 												exit(0);
 											}
+				| print relation ';'        { print("Relation %d\n", $2);}							
 				| line print expression ';'	{ printf("Printing %f\n", $3); }
+				
+				| line print relation ';'   { printf("Relation %d\n", $3.val);}
 				;
 	
 	assignment	: id '=' expression			{ printf("[log] Assignment - %c=%f\n", $1, $3); updateSymbolVal($1, $3);}
@@ -87,7 +86,33 @@
 				| expression '/' expression { printf("[log] Division - %f/%f\n", $1, $3); $$ = $1/$3;}
 				| '(' expression ')' 		{ printf("[log] Paranthesis\n"); $$ = $2;}
 				;
-			
+	relation    : expression less expression         { 	$$ = ($1<$3);
+											         	printf("[log] %f<%f\n", $1,$3); 
+											        }    
+				| expression greater expression     { 	$$ = ($1>$3);
+												      	printf("[log] %f>%f\n", $1,$3); 
+												    }
+				| expression equal expression       { 	$$ = ($1==$3);
+				                                      	printf("[log] %f==%f\n", $1,$3); 
+				                                    }
+				| expression lessequal expression   {   $$ = ($1<=$3);
+				                                    	printf("[log] %f<=%f\n", $1,$3); 
+				                                    }  
+				| expression greaterequal expression {  $$ = ($1>=$3);
+				                                       	printf("[log] %f>=%f\n", $1,$3); 
+				                                     } 
+				| expression notequal expression 	{   $$ = ($1!=$3);
+				                                    	printf("[log] %f!=%f\n", $1,$3); 
+				                                     }
+				| true_ {	$$ = 1;
+							printf("[log] %f=1", $$); 
+
+				        }
+				| false_ {	$$ = 0;
+							printf("[log] %f=0", $$);
+				         }
+				;
+
 %%
 
 /* returns the value of a given symbol */
