@@ -39,6 +39,7 @@
 }
 
 %union {float num; char id; int cond;};       /* Yacc definitions */
+
 %start line
 
 %token print
@@ -80,6 +81,20 @@
 												generateCode();
 												exit(0);
 											}
+
+				| loop ';'					{ printf("Looping"); }
+				| print expression ';'		{ printf("Printing %f\n", $2); }
+				| line assignment ';'		{;}
+				| line exit_statement ';'	{
+												printf("Exiting program. Goodbye\n");	
+												exit(0);
+											}
+				| print relation ';'        { printf("Relation %d\n", $2); }							
+				| line print expression ';'	{ printf("Printing %f\n", $3); }
+				
+				| line print relation ';'   { printf("Relation %d\n", $3); }
+				| line loop ';'				{ printf("Looping"); }
+
 				| print expression ';'		{
 												struct tac quadruple;
 												quadruple.result[0]='\0';
@@ -234,6 +249,7 @@
 				                                    	operateOnStack("!=");
 											         	printf("[log] Operated on-> %f!=%f\n", $1,$3); 
 				                                     }
+
 				| true_ {	$$ = 1;
 							printf("[log] %f=1", $$); 
 
@@ -243,6 +259,7 @@
 				         }
 				| '(' relation ')' {$$ = $2; printf("[log] (%f)", $2);}
 				;
+	loop		: while_ relation '{' line '}' 		{ printf("[log] While loop"); }; 
 	
 	condition	: if_ relation '{' line '}'                         { if($2){ 
 																				printf("[log] if_stmt %f",$4);
