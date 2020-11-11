@@ -1,12 +1,16 @@
 a = 10 + 10*(10+ 10)/10 -10;
 b = 1/2-0.5+23;
-print a;
-print b;
-print a>b;
-print a<b;
-print a<=b;
-print a>=b;
-print a==b;
+if(a>b){print a;}
+if a>b {print b;}
+if a>b { print(a>b); }
+if (a>b) { print(a>b); }
+if (a>b) {
+    print(a>b);
+}
+while(a<b){
+    print a<=b;
+    print a>=b;
+    print a==b;    
+}
 print a!=b;
-
 exit;
