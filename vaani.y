@@ -31,7 +31,7 @@
 
 
 
-%union {float num; char id; int cond; struct incod code;}         /* Yacc definitions */
+%union {float num; char id; int cond;}         /* Yacc definitions */
 %start line
 
 %token print
@@ -64,16 +64,18 @@
 												printf("Exiting program. Goodbye\n");
 												exit(0);
 											}
+				| loop ';'					{ printf("Looping"); }
 				| print expression ';'		{ printf("Printing %f\n", $2); }
 				| line assignment ';'		{;}
 				| line exit_statement ';'	{
 												printf("Exiting program. Goodbye\n");	
 												exit(0);
 											}
-				| print relation ';'        { print("Relation %d\n", $2);}							
+				| print relation ';'        { printf("Relation %d\n", $2); }							
 				| line print expression ';'	{ printf("Printing %f\n", $3); }
 				
-				| line print relation ';'   { printf("Relation %d\n", $3.val);}
+				| line print relation ';'   { printf("Relation %d\n", $3); }
+				| line loop ';'				{ printf("Looping"); }
 				;
 	
 	assignment	: id '=' expression			{ printf("[log] Assignment - %c=%f\n", $1, $3); updateSymbolVal($1, $3);}
@@ -87,7 +89,7 @@
 				| expression '/' expression { printf("[log] Division - %f/%f\n", $1, $3); $$ = $1/$3;}
 				| '(' expression ')' 		{ printf("[log] Paranthesis\n"); $$ = $2;}
 				;
-	relation    : expression less expression         { 	$$ = ($1<$3);
+	relation    : expression less expression        { 	$$ = ($1<$3);
 											         	printf("[log] %f<%f\n", $1,$3); 
 											        }    
 				| expression greater expression     { 	$$ = ($1>$3);
@@ -104,7 +106,7 @@
 				                                     } 
 				| expression notequal expression 	{   $$ = ($1!=$3);
 				                                    	printf("[log] %f!=%f\n", $1,$3); 
-				                                     }
+				                                    }
 				| true_ {	$$ = 1;
 							printf("[log] %f=1", $$); 
 
@@ -113,6 +115,7 @@
 							printf("[log] %f=0", $$);
 				         }
 				;
+	loop		: while_ relation '{' line '}' 		{ printf("[log] While loop"); }; 
 
 %%
 
