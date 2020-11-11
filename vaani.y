@@ -77,20 +77,19 @@
 												quadruple.operand1[0]='\0';
 												quadruple.operand2[0]='\0';
 												quadruples[++quadruplesIdx] = quadruple;
-												printf("[log] Pushed a quadruple. Index - %d\n", quadruplesIdx);
 												generateCode();
 												exit(0);
 											}
 				| print printable ';' lline		{;}
-				| loop lline				{ printf("Looping"); }
-        		| condition lline 				{ printf("Conditional Statement %f", $1);}
+				| loop lline				{;}
+        		| condition lline 				{ ;}
 				;
 
 	lline		:  								{;}
 				| assignment ';' lline			{	stackTop = -1;}
 				| print printable ';' lline		{ ; }
-				| loop lline				{ printf("Looping"); }
-				| condition lline			{ printf("Condition"); }
+				| loop lline				{ ; }
+				| condition lline			{ ; }
 				| exit_statement ';' 	{
 												printf("Exiting program. Goodbye\n");
 												struct tac quadruple;
@@ -99,7 +98,6 @@
 												quadruple.operand1[0]='\0';
 												quadruple.operand2[0]='\0';
 												quadruples[++quadruplesIdx] = quadruple;
-												printf("[log] Pushed a quadruple. Index - %d\n", quadruplesIdx);
 												generateCode();
 												exit(0);
 											}
@@ -112,9 +110,8 @@
 												sprintf(quadruple.operand1, "%s", lineBufferStack[stackTop]);
 												quadruple.operand2[0] = '\0';
 												quadruples[++quadruplesIdx] = quadruple;
-												printf("[log] Pushed a quadruple. Index - %d\n", quadruplesIdx);
-												printf("Relation %f\n", $1);
 												stackTop = -1;
+												printf("Printing relation -> %f\n", $1); 
 											}
 				| expression				{
 												struct tac quadruple;
@@ -123,18 +120,15 @@
 												sprintf(quadruple.operand1, "%s", lineBufferStack[stackTop]);
 												quadruple.operand2[0] = '\0';
 												quadruples[++quadruplesIdx] = quadruple;
-												printf("[log] Pushed a quadruple. Index - %d\n", quadruplesIdx);
 												stackTop = -1;
 												printf("Printing %f\n", $1); 
 											}
 				;
 	
 	assignment	: id '=' expression			{
-												printf("[log] Assignment - %c=%f\n", $1, $3);
 												updateSymbolVal($1, $3);
 												if(lineBufferStack[stackTop][0] == 't'){
 													stackTop--;
-													printf("[log] Popped %s from stack\n", lineBufferStack[stackTop+1]); 
 													sprintf(quadruples[quadruplesIdx].result, "%c", $1);
 													idsUsed--;
 												}
@@ -145,15 +139,12 @@
 													sprintf(quadruple.operand1, "%f", $3);
 													quadruple.operand2[0] = '\0';
 													quadruples[++quadruplesIdx] = quadruple;
-													printf("[log] Pushed a quadruple. Index - %d\n", quadruplesIdx);
 												}
 											}
 				| id '=' relation			{
-												printf("[log] Assignment - %c=%f\n", $1, $3);
 												updateSymbolVal($1, $3);
 												if(lineBufferStack[stackTop][0] == 't'){
 													stackTop--;
-													printf("[log] Popped %s from stack\n", lineBufferStack[stackTop+1]); 
 													sprintf(quadruples[quadruplesIdx].result, "%c", $1);
 													idsUsed--;
 												}
@@ -164,96 +155,76 @@
 													sprintf(quadruple.operand1, "%f", $3);
 													quadruple.operand2[0] = '\0';
 													quadruples[++quadruplesIdx] = quadruple;
-													printf("[log] Pushed a quadruple. Index - %d\n", quadruplesIdx);
 												}
 											}
 				;
 	expression	: num						{
-												printf("[log] Pushing %f in Stack\n", $1);
 												$$ = $1;
 												sprintf(lineBufferStack[++stackTop], "%f", $1);
 											}
 				| id 						{
-												printf("[log] Pushing %c in stack\n", $1);
 												$$ = symbolVal($1);
 												sprintf(lineBufferStack[++stackTop], "%c", $1);
 											}
 				| expression '+' expression {
 												$$ = $1+$3;
 												operateOnStack("+");
-												printf("[log] Operated -> Addition - %f -> %f+%f\n", $$, $1, $3); 
 											}
 				| expression '-' expression {
 												$$ = $1-$3;
 												operateOnStack("-");
-												printf("[log] Operated on -> Subtraction -  %f-%f\n", $1, $3);
 											}
 				| expression '*' expression {
 												$$ = $1*$3;
 												operateOnStack("*");
-												printf("[log] Operated on -> Multiplication - %f*%f\n", $1, $3); 
 											}
 				| expression '/' expression { 
 												$$ = $1/$3;
 												operateOnStack("/");
-												printf("[log] Operated on -> Division - %f/%f\n", $1, $3);
 											}
-				| '(' expression ')' 		{ printf("[log] Paranthesis\n"); $$ = $2;}
+				| '(' expression ')' 		{$$ = $2;}
 				;
 	relation    : expression less expression        { 	$$ = ($1<$3);
 														operateOnStack("<");
-											         	printf("[log] Operated on-> %f<%f\n", $1,$3); 
 											        }    
 				| expression greater expression     { 	$$ = ($1>$3);
 												      	operateOnStack(">");
-											         	printf("[log] Operated on-> %f>%f\n", $1,$3); 
 												    }
 				| expression equal expression       { 	$$ = ($1==$3);
 				                                      	operateOnStack("==");
-											         	printf("[log] Operated on-> %f==%f\n", $1,$3); 
 				                                    }
 				| expression lessequal expression   {   $$ = ($1<=$3);
 				                                    	operateOnStack("<=");
-											         	printf("[log] Operated on-> %f<=%f\n", $1,$3); 
 				                                    }  
 				| expression greaterequal expression {  $$ = ($1>=$3);
 				                                       	operateOnStack(">=");
-											         	printf("[log] Operated on-> %f>=%f\n", $1,$3); 
 				                                     } 
 				| expression notequal expression 	{   $$ = ($1!=$3);
 				                                    	operateOnStack("!=");
-											         	printf("[log] Operated on-> %f!=%f\n", $1,$3); 
 				                                     }
 
 				| true_ {	$$ = 1;
-							printf("[log] %f=1", $$); 
-
 				        }
 				| false_ {	$$ = 0;
-							printf("[log] %f=0", $$);
 				         }
-				| '(' relation ')' {$$ = $2; printf("[log] (%f)", $2);}
+				| '(' relation ')' {$$ = $2;}
 				;
 
 	cond		: relation 	{
 								char op[5];
 								sprintf(op, "%s", quadruples[quadruplesIdx].operator);
 								sprintf(quadruples[quadruplesIdx].operator, "GO%s", op);
-								printf("BLOCK STATEMENT STARTED");
 								stackTop = -1;
 							}
 				;
 
 	loop		: while_ cond '{' line '}' {
-										
 										struct tac blockStack[200];
 											int start;
 											int i=0;
-											printf("[log] While loop");
 											for (;;i++, quadruplesIdx--){
 												if(quadruples[quadruplesIdx].operator[0]=='G'&&quadruples[quadruplesIdx].operator[1]=='O') break;
 												blockStack[i] = quadruples[quadruplesIdx];
-												printf("[log] Taking out of quadruples %d", quadruplesIdx);
 											}
 											sprintf(quadruples[quadruplesIdx].result, "%d", quadruplesIdx+3);
 											start = quadruplesIdx;
@@ -263,11 +234,9 @@
 											sprintf(quadruple.operator, "GOTO");
 											sprintf(quadruple.result, "%d", quadruplesIdx+i+4);
 											quadruples[++quadruplesIdx] = quadruple;
-											printf("[log] ADDING GOTO out of quadruples %d", quadruplesIdx);
 											i--;
 											while(i>=0){
 												quadruples[++quadruplesIdx] = blockStack[i--];
-												printf("[log] ADDING to in quadruples %d", quadruplesIdx);
 											}
 											struct tac quadruple2;
 											quadruple2.operand1[0] = '\0';
@@ -283,7 +252,6 @@
 											for (;;i++, quadruplesIdx--){
 												if(quadruples[quadruplesIdx].operator[0]=='G'&&quadruples[quadruplesIdx].operator[1]=='O') break;
 												blockStack[i] = quadruples[quadruplesIdx];
-												printf("[log] Taking out of quadruples %d", quadruplesIdx);
 											}
 											sprintf(quadruples[quadruplesIdx].result, "%d", quadruplesIdx+3);
 											struct tac quadruple;
@@ -292,14 +260,11 @@
 											sprintf(quadruple.operator, "GOTO");
 											sprintf(quadruple.result, "%d", quadruplesIdx+i+3);
 											quadruples[++quadruplesIdx] = quadruple;
-											printf("[log] ADDING GOTO out of quadruples %d", quadruplesIdx);
 											i--;
 											while(i>=0){
 												quadruples[++quadruplesIdx] = blockStack[i--];
-												printf("[log] ADDING to in quadruples %d", quadruplesIdx);
 											}
 											if($2){ 
-												printf("[log] if_stmt %f",$4);
 												$$ = $4;
 											}
 										}
@@ -333,17 +298,13 @@ void operateOnStack(char* operator){
 	char *operand2;
 	struct tac quadruple;
 	operand2 = lineBufferStack[stackTop--];
-	printf("[log] Popped %s from stack\n", operand2); 
 	operand1 = lineBufferStack[stackTop--];
-	printf("[log] Popped %s from stack\n", operand1); 
 	strcpy(quadruple.operand1, operand1);
 	strcpy(quadruple.operand2, operand2);
 	sprintf(quadruple.operator, "%s", operator);
 	sprintf(quadruple.result, "t%d", ++idsUsed);
 	sprintf(lineBufferStack[++stackTop], "t%d", idsUsed);
-	printf("[log] Pushed t%d in stack\n", idsUsed); 
 	quadruples[++quadruplesIdx] = quadruple;
-	printf("[log] Pushed a quadruple. Index - %d\n", quadruplesIdx);
 }
 /* updates the value of a given symbol */
 void updateSymbolVal(char symbol, float val)
