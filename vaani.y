@@ -30,10 +30,15 @@
     void generateCode();
 	void operateOnStack(char* operator);
 %}
+%code requires {
+	struct incod
+	{
+		char codeVariable[10];
+		int val;
+	};
+}
 
-
-
-%union {float num; char id; int cond;}         /* Yacc definitions */
+%union {float num; char id; int cond;};       /* Yacc definitions */
 %start line
 
 %token print
@@ -54,6 +59,7 @@
 %type <num> expression 
 %type <id> assignment 
 %type <num> relation
+%type <num> condition
 
 
 %left '+' '-'
@@ -130,6 +136,7 @@
 												printf("Relation %f\n", $3);
 												stackTop = -1;
 											}
+        | condition 				{ printf("Conditional Statement %f", $1);}
 				;
 	
 	assignment	: id '=' expression			{
@@ -234,11 +241,29 @@
 				| false_ {	$$ = 0;
 							printf("[log] %f=0", $$);
 				         }
+				| '(' relation ')' {$$ = $2; printf("[log] (%f)", $2);}
 				;
+	
+	condition	: if_ relation '{' line '}'                         { if($2){ 
+																				printf("[log] if_stmt %f",$4);
+																				$$ = $4;
+																			}
+																	}
+				| if_ relation '{' line '}' else_ '{' line '}'      { if($2) {
+																				printf("[log] if_stmt %f",$4);
+																				$$ = $4;
+																			 }
+																		else{
+																				printf("[log] else_stmt %f",$8);
+																				$$ = $8;
+																			}
+																	}
 
 %%
 
 /* returns the value of a given symbol */
+
+// this is because 1+1 is invalid 1 + 1 is valid tanks so much how di i shrink? idk :( matlab? window size f11 let me tll you the best thing to do, you'll be happ full krke ek baar windows wala button daba 
 
 float symbolVal(char symbol)
 {
