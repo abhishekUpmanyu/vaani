@@ -25,7 +25,7 @@ branchName should ideally be informative of whatever task you're performing
 3. Compiler generated code to an output file
 `gcc lex.yy.c vaani.tab.c -o out`
 4. Run
-`.\out`
+`./out`
 
 ## Pushing the code
 
