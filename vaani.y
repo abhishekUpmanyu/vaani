@@ -68,8 +68,8 @@
 
 %%
 
-    line		: assignment ';'			{	stackTop = -1;}
-				| exit_statement ';'		{
+    line		: assignment ';' lline			{	stackTop = -1;}
+				| exit_statement ';' lline		{
 												printf("Exiting program. Goodbye\n");
 												struct tac quadruple;
 												sprintf(quadruple.result, "0");
@@ -81,33 +81,18 @@
 												generateCode();
 												exit(0);
 											}
+				| print printable ';' lline		{;}
+				| loop ';' lline				{ printf("Looping"); }
+        		| condition lline 				{ printf("Conditional Statement %f", $1);}
+				;
 
-				| loop ';'					{ printf("Looping"); }
-				| print expression ';'		{ printf("Printing %f\n", $2); }
-				| line assignment ';'		{;}
-				| line exit_statement ';'	{
-												printf("Exiting program. Goodbye\n");	
-												exit(0);
-											}
-				| print relation ';'        { printf("Relation %d\n", $2); }							
-				| line print expression ';'	{ printf("Printing %f\n", $3); }
-				
-				| line print relation ';'   { printf("Relation %d\n", $3); }
-				| line loop ';'				{ printf("Looping"); }
-
-				| print expression ';'		{
-												struct tac quadruple;
-												quadruple.result[0]='\0';
-												sprintf(quadruple.operator, "PRINT");
-												sprintf(quadruple.operand1, "%s", lineBufferStack[stackTop]);
-												quadruple.operand2[0] = '\0';
-												quadruples[++quadruplesIdx] = quadruple;
-												printf("[log] Pushed a quadruple. Index - %d\n", quadruplesIdx);
-												stackTop = -1;
-												printf("Printing %f\n", $2); 
-											}
-				| line assignment ';'		{stackTop = -1;}
-				| line exit_statement ';'	{printf("Exiting program. Goodbye\n");
+	lline		:  
+				| assignment ';' lline			{	stackTop = -1;}
+				| print printable ';' lline		{ ; }
+				| loop ';' lline				{ printf("Looping"); }
+				| condition ';' lline			{ printf("Condition"); }
+				| exit_statement ';' lline		{
+												printf("Exiting program. Goodbye\n");
 												struct tac quadruple;
 												sprintf(quadruple.result, "0");
 												sprintf(quadruple.operator, "EXIT");
@@ -116,8 +101,10 @@
 												quadruples[++quadruplesIdx] = quadruple;
 												printf("[log] Pushed a quadruple. Index - %d\n", quadruplesIdx);
 												generateCode();
-												exit(0);}
-				| print relation ';'        {
+												exit(0);
+											}
+	
+	printable	: relation      			{
 												struct tac quadruple;
 												quadruple.result[0]='\0';
 												sprintf(quadruple.operator, "PRINT");
@@ -125,10 +112,10 @@
 												quadruple.operand2[0] = '\0';
 												quadruples[++quadruplesIdx] = quadruple;
 												printf("[log] Pushed a quadruple. Index - %d\n", quadruplesIdx);
-												printf("Relation %f\n", $2);
+												printf("Relation %f\n", $1);
 												stackTop = -1;
 											}
-				| line print expression ';'	{
+				| expression				{
 												struct tac quadruple;
 												quadruple.result[0]='\0';
 												sprintf(quadruple.operator, "PRINT");
@@ -137,22 +124,8 @@
 												quadruples[++quadruplesIdx] = quadruple;
 												printf("[log] Pushed a quadruple. Index - %d\n", quadruplesIdx);
 												stackTop = -1;
-												printf("Printing %f\n", $3); 
+												printf("Printing %f\n", $1); 
 											}
-				
-				| line print relation ';'   {
-												struct tac quadruple;
-												quadruple.result[0]='\0';
-												sprintf(quadruple.operator, "PRINT");
-												sprintf(quadruple.operand1, "%s", lineBufferStack[stackTop]);
-												quadruple.operand2[0] = '\0';
-												quadruples[++quadruplesIdx] = quadruple;
-												printf("[log] Pushed a quadruple. Index - %d\n", quadruplesIdx);
-												printf("Relation %f\n", $3);
-												stackTop = -1;
-											}
-        | condition 				{ printf("Conditional Statement %f", $1);}
-				;
 	
 	assignment	: id '=' expression			{
 												printf("[log] Assignment - %c=%f\n", $1, $3);
@@ -259,6 +232,7 @@
 				         }
 				| '(' relation ')' {$$ = $2; printf("[log] (%f)", $2);}
 				;
+
 	loop		: while_ relation '{' line '}' 		{ printf("[log] While loop"); }; 
 	
 	condition	: if_ relation '{' line '}'                         { if($2){ 
