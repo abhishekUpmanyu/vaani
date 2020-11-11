@@ -28,10 +28,15 @@
     float addToTable(char operand, char operator1, char operator2);
     void generateCode();
 %}
+%code requires {
+	struct incod
+	{
+		char codeVariable[10];
+		int val;
+	};
+}
 
-
-
-%union {float num; char id; int cond;}         /* Yacc definitions */
+%union {float num; char id; int cond;};       /* Yacc definitions */
 %start line
 
 %token print
@@ -52,6 +57,7 @@
 %type <num> expression 
 %type <id> assignment 
 %type <num> relation
+%type <num> condition
 
 
 %left '+' '-'
@@ -74,6 +80,7 @@
 				| line print expression ';'	{ printf("Printing %f\n", $3); }
 				
 				| line print relation ';'   { printf("Relation %f\n", $3);}
+				| condition 				{ printf("Conditional Statement %f", $1);}
 				;
 	
 	assignment	: id '=' expression			{ printf("[log] Assignment - %c=%f\n", $1, $3); updateSymbolVal($1, $3);}
@@ -88,22 +95,54 @@
 				| '(' expression ')' 		{ printf("[log] Paranthesis\n"); $$ = $2;}
 				;
 	relation    : expression less expression         { 	$$ = ($1<$3);
-											         	printf("[log] %f<%f\n", $1,$3); 
+											         	if ($1<$3){
+															 printf("[log] true %f<%f and $$ is %f", $1,$3,$$);
+														 } 
+														 else {
+															 printf("[log] false %f<%f", $1,$3);
+														 }
 											        }    
 				| expression greater expression     { 	$$ = ($1>$3);
-												      	printf("[log] %f>%f\n", $1,$3); 
+														if($1>$3){
+															printf("[log] true %f>%f\n", $1,$3);
+														}
+														else {
+															printf("[log] false %f>%f \n", $1,$3);
+														}
+												      	 
 												    }
 				| expression equal expression       { 	$$ = ($1==$3);
-				                                      	printf("[log] %f==%f\n", $1,$3); 
+		
+				                                      	if($1==$3){
+															printf("[log] true  %f==%f\n", $1,$3);
+														}
+														else {
+															printf("[log] false %f==%f \n", $1,$3);
+														} 
 				                                    }
 				| expression lessequal expression   {   $$ = ($1<=$3);
-				                                    	printf("[log] %f<=%f\n", $1,$3); 
+				                                    	if($1<=$3){
+															printf("[log] true  %f<=%f\n", $1,$3);
+														}
+														else {
+															printf("[log] false %f<=%f\n", $1,$3);
+														} 
 				                                    }  
 				| expression greaterequal expression {  $$ = ($1>=$3);
-				                                       	printf("[log] %f>=%f\n", $1,$3); 
+				                                       	if($1>=$3){
+															printf("[log] true %f>=%f\n", $1,$3);
+														}
+														else {
+															printf("[log] false %f>=%f \n", $1,$3);
+														} 
 				                                     } 
 				| expression notequal expression 	{   $$ = ($1!=$3);
-				                                    	printf("[log] %f!=%f\n", $1,$3); 
+				                                    	if($1!=$3){
+															printf("[log] true %f!=%f\n", $1,$3);
+														}
+														else {
+															printf("[log] false %f!=%f \n", $1,$3);
+														}
 				                                     }
 				| true_ {	$$ = 1;
 							printf("[log] %f=1", $$); 
@@ -112,11 +151,29 @@
 				| false_ {	$$ = 0;
 							printf("[log] %f=0", $$);
 				         }
+				| '(' relation ')' {$$ = $2; printf("[log] (%f)", $2);}
 				;
+	
+	condition	: if_ relation '{' line '}'                         { if($2){ 
+																				printf("[log] if_stmt %f",$4);
+																				$$ = $4;
+																			}
+																	}
+				| if_ relation '{' line '}' else_ '{' line '}'      { if($2) {
+																				printf("[log] if_stmt %f",$4);
+																				$$ = $4;
+																			 }
+																		else{
+																				printf("[log] else_stmt %f",$8);
+																				$$ = $8;
+																			}
+																	}
 
 %%
 
 /* returns the value of a given symbol */
+
+// this is because 1+1 is invalid 1 + 1 is valid tanks so much how di i shrink? idk :( matlab? window size f11 let me tll you the best thing to do, you'll be happ full krke ek baar windows wala button daba 
 
 float symbolVal(char symbol)
 {
