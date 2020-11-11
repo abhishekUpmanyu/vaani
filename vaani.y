@@ -31,7 +31,7 @@
 
 
 
-%union {float num; char id; int cond; struct incod code;}         /* Yacc definitions */
+%union {float num; char id; int cond;}         /* Yacc definitions */
 %start line
 
 %token print
@@ -70,10 +70,10 @@
 												printf("Exiting program. Goodbye\n");	
 												exit(0);
 											}
-				| print relation ';'        { print("Relation %d\n", $2);}							
+				| print relation ';'        { printf("Relation %f\n", $2);}							
 				| line print expression ';'	{ printf("Printing %f\n", $3); }
 				
-				| line print relation ';'   { printf("Relation %d\n", $3.val);}
+				| line print relation ';'   { printf("Relation %f\n", $3);}
 				;
 	
 	assignment	: id '=' expression			{ printf("[log] Assignment - %c=%f\n", $1, $3); updateSymbolVal($1, $3);}
