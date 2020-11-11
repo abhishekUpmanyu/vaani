@@ -1,0 +1,4 @@
+bison -d vaani.y
+flex vaani.l
+gcc lex.yy.c vaani.tab.c -o vaani
+./vaani<$1
