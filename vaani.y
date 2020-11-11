@@ -38,7 +38,7 @@
 	};
 }
 
-%union {float num; char id; int cond;};       /* Yacc definitions */
+%union {float num; char id;};       /* Yacc definitions */
 
 %start line
 
@@ -61,7 +61,7 @@
 %type <id> assignment 
 %type <num> relation
 %type <num> condition
-
+%type <num> cond
 
 %left '+' '-'
 %left '*' '/' '%'
@@ -69,7 +69,7 @@
 %%
 
     line		: assignment ';' lline			{	stackTop = -1;}
-				| exit_statement ';' lline		{
+				| exit_statement ';' 	{
 												printf("Exiting program. Goodbye\n");
 												struct tac quadruple;
 												sprintf(quadruple.result, "0");
@@ -82,16 +82,16 @@
 												exit(0);
 											}
 				| print printable ';' lline		{;}
-				| loop ';' lline				{ printf("Looping"); }
+				| loop lline				{ printf("Looping"); }
         		| condition lline 				{ printf("Conditional Statement %f", $1);}
 				;
 
-	lline		:  
+	lline		:  								{;}
 				| assignment ';' lline			{	stackTop = -1;}
 				| print printable ';' lline		{ ; }
-				| loop ';' lline				{ printf("Looping"); }
-				| condition ';' lline			{ printf("Condition"); }
-				| exit_statement ';' lline		{
+				| loop lline				{ printf("Looping"); }
+				| condition lline			{ printf("Condition"); }
+				| exit_statement ';' 	{
 												printf("Exiting program. Goodbye\n");
 												struct tac quadruple;
 												sprintf(quadruple.result, "0");
@@ -103,6 +103,7 @@
 												generateCode();
 												exit(0);
 											}
+				;
 	
 	printable	: relation      			{
 												struct tac quadruple;
@@ -126,6 +127,7 @@
 												stackTop = -1;
 												printf("Printing %f\n", $1); 
 											}
+				;
 	
 	assignment	: id '=' expression			{
 												printf("[log] Assignment - %c=%f\n", $1, $3);
@@ -233,28 +235,80 @@
 				| '(' relation ')' {$$ = $2; printf("[log] (%f)", $2);}
 				;
 
-	loop		: while_ relation '{' line '}' 		{ printf("[log] While loop"); }; 
+	cond		: relation 	{
+								char op[5];
+								sprintf(op, "%s", quadruples[quadruplesIdx].operator);
+								sprintf(quadruples[quadruplesIdx].operator, "GO%s", op);
+								printf("BLOCK STATEMENT STARTED");
+								stackTop = -1;
+							}
+				;
+
+	loop		: while_ cond '{' line '}' {
+										
+										struct tac blockStack[200];
+											int start;
+											int i=0;
+											printf("[log] While loop");
+											for (;;i++, quadruplesIdx--){
+												if(quadruples[quadruplesIdx].operator[0]=='G'&&quadruples[quadruplesIdx].operator[1]=='O') break;
+												blockStack[i] = quadruples[quadruplesIdx];
+												printf("[log] Taking out of quadruples %d", quadruplesIdx);
+											}
+											sprintf(quadruples[quadruplesIdx].result, "%d", quadruplesIdx+3);
+											start = quadruplesIdx;
+											struct tac quadruple;
+											quadruple.operand1[0] = '\0';
+											quadruple.operand2[0] = '\0'; 
+											sprintf(quadruple.operator, "GOTO");
+											sprintf(quadruple.result, "%d", quadruplesIdx+i+4);
+											quadruples[++quadruplesIdx] = quadruple;
+											printf("[log] ADDING GOTO out of quadruples %d", quadruplesIdx);
+											i--;
+											while(i>=0){
+												quadruples[++quadruplesIdx] = blockStack[i--];
+												printf("[log] ADDING to in quadruples %d", quadruplesIdx);
+											}
+											struct tac quadruple2;
+											quadruple2.operand1[0] = '\0';
+											quadruple2.operand2[0] = '\0'; 
+											sprintf(quadruple2.operator, "GOTO");
+											sprintf(quadruple2.result, "%d", start+1);
+											quadruples[++quadruplesIdx] = quadruple2;
+										}; 
 	
-	condition	: if_ relation '{' line '}'                         { if($2){ 
-																				printf("[log] if_stmt %f",$4);
-																				$$ = $4;
-																			}
-																	}
-				| if_ relation '{' line '}' else_ '{' line '}'      { if($2) {
-																				printf("[log] if_stmt %f",$4);
-																				$$ = $4;
-																			 }
-																		else{
-																				printf("[log] else_stmt %f",$8);
-																				$$ = $8;
-																			}
-																	}
+	condition	: if_ cond '{' line '}' {
+											struct tac blockStack[200];
+											int i=0;
+											for (;;i++, quadruplesIdx--){
+												if(quadruples[quadruplesIdx].operator[0]=='G'&&quadruples[quadruplesIdx].operator[1]=='O') break;
+												blockStack[i] = quadruples[quadruplesIdx];
+												printf("[log] Taking out of quadruples %d", quadruplesIdx);
+											}
+											sprintf(quadruples[quadruplesIdx].result, "%d", quadruplesIdx+3);
+											struct tac quadruple;
+											quadruple.operand1[0] = '\0';
+											quadruple.operand2[0] = '\0'; 
+											sprintf(quadruple.operator, "GOTO");
+											sprintf(quadruple.result, "%d", quadruplesIdx+i+3);
+											quadruples[++quadruplesIdx] = quadruple;
+											printf("[log] ADDING GOTO out of quadruples %d", quadruplesIdx);
+											i--;
+											while(i>=0){
+												quadruples[++quadruplesIdx] = blockStack[i--];
+												printf("[log] ADDING to in quadruples %d", quadruplesIdx);
+											}
+											if($2){ 
+												printf("[log] if_stmt %f",$4);
+												$$ = $4;
+											}
+										}
+				;
 
 %%
 
 /* returns the value of a given symbol */
 
-// this is because 1+1 is invalid 1 + 1 is valid tanks so much how di i shrink? idk :( matlab? window size f11 let me tll you the best thing to do, you'll be happ full krke ek baar windows wala button daba 
 
 float symbolVal(char symbol)
 {
@@ -310,6 +364,13 @@ void generateCode()
 		}
 		if(quadruples[i].result[0] == '\0' && quadruples[i].operator[0] == 'P'){
 			printf("%3d. PRINT %s\n", line, quadruples[i].operand1); continue;
+		}
+		if(quadruples[i].operator[0] == 'G' && quadruples[i].operator[1] == 'O'){
+			if(quadruples[i].operand1[0]=='\0' && quadruples[i].operand2[0]=='\0'){
+				printf("%3d. GOTO %s\n", line, quadruples[i].result); continue;
+			}
+			printf("%3d. IF %s %s %s GOTO %s\n", line, quadruples[i].operand1, (quadruples[i].operator+2), quadruples[i].operand2, quadruples[i].result);
+			continue;
 		}
 		printf("%3d. %s := %s %s %s\n", line, quadruples[i].result, quadruples[i].operand1, quadruples[i].operator, quadruples[i].operand2);
 	}
