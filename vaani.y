@@ -30,13 +30,6 @@
     void generateCode();
 	void operateOnStack(char* operator);
 %}
-%code requires {
-	struct incod
-	{
-		char codeVariable[10];
-		int val;
-	};
-}
 
 %union {float num; char id;};       /* Yacc definitions */
 
