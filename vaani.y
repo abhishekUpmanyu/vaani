@@ -293,7 +293,7 @@ void generateCode()
 			printf("%3d. EXIT\n", line); break;
 		}
 		if(quadruples[i].result[0] == '\0' && quadruples[i].operator[0] == 'P'){
-			printf("%3d. PRINT %s\n", line, quadruples[i].operand1); break;
+			printf("%3d. PRINT %s\n", line, quadruples[i].operand1); continue;
 		}
 		printf("%3d. %s := %s %s %s\n", line, quadruples[i].result, quadruples[i].operand1, quadruples[i].operator, quadruples[i].operand2);
 	}
