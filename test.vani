@@ -1,16 +1,17 @@
 a = 10 + 10*(10+ 10)/10 -10;
 b = 1/2-0.5+23;
-if(a>b){print a;}
-if a>b {print b;}
-if a>b { print(a>b); }
-if (a>b) { print(a>b); }
-if (a>b) {
-    print(a>b);
+agar(a<b){dikhao a;}
+agar a<b {dikhao b;}
+agar a<b { dikhao(a>b); }
+agar (a<b) { dikhao(a>b); }
+agar (a<b) {
+    dikhao(a>b);
 }
-while(a<b){
-    print a<=b;
-    print a>=b;
-    print a==b;    
+jabtak(a<b){
+    dikhao a<=b;
+    dikhao a>=b;
+    dikhao a==b;
+    a = a + 3;  
 }
-print a!=b;
+dikhao a!=b;
 exit;

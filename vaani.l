@@ -4,17 +4,16 @@ void yyerror (char *s);
 int yylex();
 %}
 %%
-"if"                        {return if_;}
-"else"                      {return else_;}
+"agar"                      {return if_;}
 
-"while"                     {return while_;}
+"jabtak"                    {return while_;}
 
-"print"                     {return print;}
+"dikhao"                    {return print;}
 
 "exit"                      {return exit_statement;}
 
-"True"                      {return true_;}
-"False"                     {return false_;}
+"Sahi"                      {return true_;}
+"Galat"                     {return false_;}
 
 "<"                         {return less;}
 ">"                         {return greater;}
@@ -32,5 +31,3 @@ int yylex();
 
 %%
 int yywrap (void) {return 1;}
-
-// TODO: Change token names accordingly
