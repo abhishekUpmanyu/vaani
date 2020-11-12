@@ -46,7 +46,6 @@
 %token lessequal greaterequal
 %token notequal
 %token if_
-%token else_
 %token while_
 
 %type <num> line 
@@ -266,15 +265,13 @@
 %%
 
 /* returns the value of a given symbol */
-
-
 float symbolVal(char symbol)
 {
 	int bucket = getSymbolIdx(symbol);
 	return symbols[bucket];
 }
 
-
+/* return index of a given token */
 int getSymbolIdx(char token)
 {
 	int idx = -1;
@@ -286,6 +283,7 @@ int getSymbolIdx(char token)
 	return idx;
 }
 
+/* operates on top two operands in stack */
 void operateOnStack(char* operator){
 	char *operand1;
 	char *operand2;
@@ -299,6 +297,7 @@ void operateOnStack(char* operator){
 	sprintf(lineBufferStack[++stackTop], "t%d", idsUsed);
 	quadruples[++quadruplesIdx] = quadruple;
 }
+
 /* updates the value of a given symbol */
 void updateSymbolVal(char symbol, float val)
 {
@@ -306,6 +305,7 @@ void updateSymbolVal(char symbol, float val)
 	symbols[bucket] = val;
 }
 
+/* generates three address code */
 void generateCode()
 {
 	
