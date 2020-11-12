@@ -103,7 +103,10 @@
 												quadruple.operand2[0] = '\0';
 												quadruples[++quadruplesIdx] = quadruple;
 												stackTop = -1;
-												printf("Printing relation -> %f\n", $1); 
+												if ($1)
+													printf("Sahi\n");
+												else
+													printf("Galat\n"); 
 											}
 				| expression				{
 												struct tac quadruple;
@@ -113,7 +116,7 @@
 												quadruple.operand2[0] = '\0';
 												quadruples[++quadruplesIdx] = quadruple;
 												stackTop = -1;
-												printf("Printing %f\n", $1); 
+												printf("%f\n", $1); 
 											}
 				;
 	
