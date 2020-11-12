@@ -1,16 +1,17 @@
 a = 10 + 10*(10+ 10)/10 -10;
 b = 1/2-0.5+23;
-agar(a>b){dikhao a;}
-agar a>b {dikhao b;}
-agar a>b { dikhao(a>b); }
-agar (a>b) { dikhao(a>b); }
-agar (a>b) {
+agar(a<b){dikhao a;}
+agar a<b {dikhao b;}
+agar a<b { dikhao(a>b); }
+agar (a<b) { dikhao(a>b); }
+agar (a<b) {
     dikhao(a>b);
 }
 jabtak(a<b){
     dikhao a<=b;
     dikhao a>=b;
-    dikhao a==b;    
+    dikhao a==b;
+    a = a + 3;  
 }
 dikhao a!=b;
 exit;
